@@ -1,1 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Stack Decision Guide | Greater Ambitions LLC</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --burgundy: #52211A; --burgundy-lt: #7A3028;
+    --gold: #A87605; --gold-lt: #D4A82B;
+    --cream: #FAF7F2; --ink: #1A1714; --ink-mid: #3D3A35; --ink-muted: #6B6660;
+    --border: #E4DDD4; --border-strong: #C8BFB4;
+    --bg-warm: #F5F0E8; --bg-card: #FFFFFF;
+    --success: #2D6A4F; --success-lt: #E8F5EE;
+    --info: #1A4A7A; --info-lt: #E8F0FA;
+    --warn: #7A4A00; --warn-lt: #FDF3E0;
+    --danger: #7A1A1A; --danger-lt: #FAE8E8;
+    --purple: #4A2880; --purple-lt: #F0EAFA;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); font-size: 15px; line-height: 1.6; }
+  a.tool-link { color: inherit; text-decoration: none; border-bottom: 1px solid var(--gold); transition: color .15s, border-color .15s; }
+  a.tool-link:hover { color: var(--burgundy); border-color: var(--burgundy); }
+  .site-header { background: var(--ink); padding: 2.5rem 3rem; display: flex; align-items: flex-start; justify-content: space-between; }
+  .logo-block .logo-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: var(--cream); letter-spacing: .02em; }
+  .logo-block .logo-sub { font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: .18em; color: var(--gold); text-transform: uppercase; margin-top: 2px; }
+  .header-title { text-align: right; }
+  .header-title h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: var(--cream); line-height: 1.2; }
+  .header-title .subtitle { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--gold-lt); letter-spacing: .06em; text-transform: uppercase; margin-top: 5px; }
+  .intro-strip { background: var(--burgundy); padding: 1.25rem 3rem; color: rgba(255,255,255,.82); font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.7; letter-spacing: .01em; }
+  .intro-strip strong { color: #fff; font-weight: 500; }
+  .main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+  .tab-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .tab-btn { padding: 8px 18px; border-radius: 6px; border: 1px solid var(--border-strong); background: var(--bg-warm); color: var(--ink-muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; cursor: pointer; transition: all .18s; }
+  .tab-btn:hover { background: #fff; color: var(--ink); border-color: var(--ink-muted); }
+  .tab-btn.active { background: var(--burgundy); color: #fff; border-color: var(--burgundy); font-weight: 500; }
+  .tab-btn .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .tier-panel { display: none; }
+  .tier-panel.active { display: block; }
+  .tier-header { display: flex; align-items: flex-start; gap: 18px; padding: 1.25rem 1.5rem; border-radius: 10px; border: 1px solid var(--border); background: #fff; margin-bottom: 1.5rem; }
+  .tier-icon { width: 52px; height: 52px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+  .tier-meta h2 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 500; margin-bottom: 5px; color: var(--ink); }
+  .tier-meta p { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-muted); line-height: 1.65; }
+  .signals-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  @media(max-width:700px){ .signals-row { grid-template-columns: repeat(2,1fr); } }
+  .signal-card { padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
+  .signal-card .sc-label { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 4px; }
+  .signal-card .sc-val { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); font-weight: 500; }
+  .stack-section { margin-bottom: 1.5rem; }
+  .stack-label { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .stack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+  .stack-card { padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); background: #fff; transition: border-color .15s, box-shadow .15s; }
+  .stack-card:hover { border-color: var(--gold); box-shadow: 0 2px 8px rgba(168,118,5,.08); }
+  .stack-card .sc-name { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .stack-card .sc-cat { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--ink-muted); }
+  .sc-cost { display: inline-block; margin-top: 6px; font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .cost-free { background: var(--success-lt); color: var(--success); }
+  .cost-low  { background: var(--info-lt); color: var(--info); }
+  .cost-mid  { background: var(--warn-lt); color: var(--warn); }
+  .cost-high { background: var(--danger-lt); color: var(--danger); }
+  .pm-box { padding: 1.25rem 1.5rem; border-radius: 10px; border-left: 4px solid var(--burgundy); background: var(--bg-warm); margin-top: 1.5rem; }
+  .pm-box h4 { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 500; color: var(--burgundy); margin-bottom: 10px; }
+  .pm-row { display: flex; gap: 10px; margin-bottom: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.6; }
+  .pm-row:last-child { margin-bottom: 0; }
+  .pm-arrow { color: var(--gold); font-weight: 600; flex-shrink: 0; }
+  .divider { height: 1px; background: var(--border); margin: 1.75rem 0; }
+  .scorecard-wrap { overflow-x: auto; }
+  .scorecard-table { width: 100%; border-collapse: collapse; font-family: 'DM Sans', sans-serif; font-size: 13px; min-width: 600px; }
+  .scorecard-table th { font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-muted); text-align: left; padding: 8px 10px; border-bottom: 2px solid var(--border-strong); background: var(--bg-warm); }
+  .scorecard-table td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--ink); vertical-align: top; }
+  .scorecard-table tr:last-child td { border-bottom: none; }
+  .scorecard-table tr:hover td { background: var(--bg-warm); }
+  .wt-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; border: 1px solid var(--border); }
+  .wt-high     { background: var(--warn-lt);    color: var(--warn);    border-color: #E4C070; }
+  .wt-critical { background: var(--burgundy);   color: #fff;           border-color: var(--burgundy); }
+  .wt-med      { background: var(--info-lt);    color: var(--info);    border-color: #A0BEE0; }
+  .wt-low      { background: var(--success-lt); color: var(--success); border-color: #A0CDB8; }
+  .red-flag-list { display: flex; flex-direction: column; gap: 8px; }
+  .red-flag { display: flex; gap: 10px; align-items: flex-start; font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.55; padding: 10px 12px; background: var(--danger-lt); border-radius: 6px; border-left: 3px solid #C04040; }
+  .rf-icon { color: #A03030; flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+  .phase-steps { display: flex; flex-direction: column; gap: 0; }
+  .phase-step { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .phase-step:last-child { border-bottom: none; }
+  .phase-num { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; color: var(--burgundy); background: var(--cream); border: 2px solid var(--burgundy); margin-top: 2px; }
+  .phase-content h5 { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; margin-bottom: 4px; color: var(--ink); }
+  .phase-content p { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-muted); line-height: 1.6; }
+  .section-head { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: var(--ink); margin-bottom: 12px; }
+  .section-sub { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-muted); margin-bottom: 1.25rem; line-height: 1.6; }
+  .cta-strip { background: var(--ink); color: var(--gold-lt); text-align: center; padding: 1.5rem; font-family: 'DM Sans', sans-serif; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; border-radius: 8px; margin-top: 2rem; }
+  .cta-strip strong { color: #fff; display: block; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; letter-spacing: .02em; margin-bottom: 4px; text-transform: none; }
+  .phil-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 10px; margin-top: 1rem; }
+  .phil-card { padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
+  .phil-card .pc-num { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--border-strong); font-weight: 600; line-height: 1; margin-bottom: 8px; }
+  .phil-card p { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-muted); line-height: 1.6; }
+  .phil-card strong { color: var(--ink); font-weight: 500; }
+  @media(max-width:680px){ .site-header { flex-direction: column; gap: 1rem; padding: 1.5rem; } .header-title { text-align: left; } .intro-strip { padding: 1rem 1.5rem; } .main { padding: 1.5rem 1rem 3rem; } }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="logo-block">
+    <a href='https://postimg.cc/bSYhPL8Q' target='_blank'><img src='https://i.postimg.cc/bSYhPL8Q/rev-Screenshot-2026-04-27-at-10-23-19-AM.png' border='0' alt='rev-Screenshot-2026-04-27-at-10-23-19-AM'></a>
+  </div>
+  <div class="header-title">
+    <h1>The Execution-Ready Tech Stack</h1>
+    <div class="subtitle">From Solopreneur to Enterprise — A PM Perspective</div>
+  </div>
+</header>
+<div class="intro-strip">A tech stack isn't a shopping list — it's an <strong>operational system.</strong> Every tool you add should eliminate friction, enable visibility, or accelerate execution. This guide breaks down the right stack at every business stage and gives you the evaluation framework to decide, build, and govern yours with intention.</div>
+<main class="main">
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('solo',this)"><span class="dot" style="background:#2D6A4F"></span>Solopreneur</button>
+    <button class="tab-btn" onclick="showTab('smb',this)"><span class="dot" style="background:#BA7517"></span>SMB</button>
+    <button class="tab-btn" onclick="showTab('midmarket',this)"><span class="dot" style="background:#1A4A7A"></span>Mid-Market</button>
+    <button class="tab-btn" onclick="showTab('enterprise',this)"><span class="dot" style="background:#4A2880"></span>Enterprise</button>
+    <button class="tab-btn" onclick="showTab('eval',this)"><span class="dot" style="background:#52211A"></span>Evaluation Framework</button>
+    <button class="tab-btn" onclick="showTab('build',this)"><span class="dot" style="background:#5F5E5A"></span>Build / Revise Your Stack</button>
+  </div>
 
+  <!-- SOLOPRENEUR -->
+  <div class="tier-panel active" id="tab-solo">
+    <div class="tier-header">
+      <div class="tier-icon" style="background:#E8F5EE">🌱</div>
+      <div class="tier-meta">
+        <h2>Solopreneur / Freelancer</h2>
+        <p>1–2 people doing everything. Speed, low cost, and automation-over-process wins every time. Your stack must eliminate friction, not create it. Avoid tool sprawl — every tool you add is a context switch and a monthly bill.</p>
+      </div>
+    </div>
+    <div class="signals-row">
+      <div class="signal-card"><div class="sc-label">Team size</div><div class="sc-val">1–2 people</div></div>
+      <div class="signal-card"><div class="sc-label">Annual revenue</div><div class="sc-val">Pre-revenue → $500K</div></div>
+      <div class="signal-card"><div class="sc-label">PM maturity</div><div class="sc-val">Informal / self-managed</div></div>
+      <div class="signal-card"><div class="sc-label">Stack budget</div><div class="sc-val">$0 – $300/mo</div></div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">📋 Project &amp; Task Management</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.notion.so" target="_blank" rel="noopener">Notion</a></div><div class="sc-cat">All-in-one workspace — docs, tasks, CRM in one</div><span class="sc-cost cost-free">Free / $10 mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://clickup.com" target="_blank" rel="noopener">ClickUp</a></div><div class="sc-cat">Tasks + docs + goals + time tracking</div><span class="sc-cost cost-free">Free tier</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://trello.com" target="_blank" rel="noopener">Trello</a></div><div class="sc-cat">Visual kanban — lowest learning curve</div><span class="sc-cost cost-free">Free tier</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">🤝 CRM / Client Management</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.hubspot.com/products/crm" target="_blank" rel="noopener">HubSpot CRM</a></div><div class="sc-cat">Contacts, pipeline, email tracking</div><span class="sc-cost cost-free">Free forever</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.dubsado.com" target="_blank" rel="noopener">Dubsado</a></div><div class="sc-cat">Proposals + contracts + invoices + onboarding</div><span class="sc-cost cost-low">$20/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.notion.so/templates/category/crm" target="_blank" rel="noopener">Notion CRM Template</a></div><div class="sc-cat">If already using Notion — avoid tool duplication</div><span class="sc-cost cost-free">Free</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">💰 Finance &amp; Invoicing</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.waveapps.com" target="_blank" rel="noopener">Wave</a></div><div class="sc-cat">Free invoicing + accounting + receipt scanning</div><span class="sc-cost cost-free">Free</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://quickbooks.intuit.com" target="_blank" rel="noopener">QuickBooks Simple Start</a></div><div class="sc-cat">Tax-ready bookkeeping, syncs with bank</div><span class="sc-cost cost-low">$18/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://stripe.com" target="_blank" rel="noopener">Stripe</a> / <a class="tool-link" href="https://www.paypal.com" target="_blank" rel="noopener">PayPal</a></div><div class="sc-cat">Payment collection and processing</div><span class="sc-cost cost-free">% per transaction</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">📬 Communications &amp; Scheduling</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://workspace.google.com" target="_blank" rel="noopener">Google Workspace</a></div><div class="sc-cat">Gmail, Drive, Meet, Docs — foundational hub</div><span class="sc-cost cost-low">$6/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://zoom.us/pricing" target="_blank" rel="noopener">Zoom Workplace</a></div><div class="sc-cat">Video meetings, webinars, async clips — client-facing standard</div><span class="sc-cost cost-free">Free / $15.99 mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://calendly.com" target="_blank" rel="noopener">Calendly</a></div><div class="sc-cat">Automated scheduling — eliminates email tag</div><span class="sc-cost cost-free">Free / $10 mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.loom.com" target="_blank" rel="noopener">Loom</a></div><div class="sc-cat">Async video comms, client walkthroughs</div><span class="sc-cost cost-free">Free tier</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">🤖 Automation &amp; AI</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://zapier.com" target="_blank" rel="noopener">Zapier</a> / <a class="tool-link" href="https://www.make.com" target="_blank" rel="noopener">Make</a></div><div class="sc-cat">No-code automation between tools</div><span class="sc-cost cost-free">Free tier</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://claude.ai" target="_blank" rel="noopener">Claude</a> / <a class="tool-link" href="https://chat.openai.com" target="_blank" rel="noopener">ChatGPT</a></div><div class="sc-cat">Content, strategy, SOPs, client comms drafting</div><span class="sc-cost cost-low">$20/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.canva.com" target="_blank" rel="noopener">Canva</a></div><div class="sc-cat">Design + branded content + social posts</div><span class="sc-cost cost-free">Free / $15 mo Pro</span></div>
+      </div>
+    </div>
+    <div class="pm-box">
+      <h4>PM Operating Principles — Solopreneur Tier</h4>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Consolidate ruthlessly.</strong> The best solopreneur stack is 3–5 tools, not 15. Choose one "hub" — Notion, ClickUp, or Google Workspace — and build everything around it. Every tool outside the hub must justify its existence monthly.</span></div>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Automate before you hire.</strong> Every manual, repeatable task (onboarding emails, invoice reminders, scheduling) is a Zapier trigger waiting to happen. Document it first, then automate. This buys back billable hours.</span></div>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Build for the next tier.</strong> Choose tools with SMB upgrade paths (HubSpot → HubSpot Pro, ClickUp Free → ClickUp Business) so you're not migrating data when growth demands it.</span></div>
+    </div>
+  </div>
+
+  <!-- SMB -->
+  <div class="tier-panel" id="tab-smb">
+    <div class="tier-header">
+      <div class="tier-icon" style="background:#FDF3E0">⚙️</div>
+      <div class="tier-meta">
+        <h2>SMB — Small &amp; Medium Business</h2>
+        <p>3–50 people. The danger zone for tech debt. You're past "one person manages it all" but not large enough for dedicated ops or IT. Informal processes break under team load. The priority is lightweight governance — not bureaucracy, but enough structure to prevent duplicate work and data loss.</p>
+      </div>
+    </div>
+    <div class="signals-row">
+      <div class="signal-card"><div class="sc-label">Team size</div><div class="sc-val">3–50 people</div></div>
+      <div class="signal-card"><div class="sc-label">Annual revenue</div><div class="sc-val">$500K – $10M</div></div>
+      <div class="signal-card"><div class="sc-label">PM maturity</div><div class="sc-val">Emerging / ad hoc PM</div></div>
+      <div class="signal-card"><div class="sc-label">Stack budget</div><div class="sc-val">$300 – $5K/mo</div></div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">📋 Project &amp; Work Management</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://asana.com" target="_blank" rel="noopener">Asana</a></div><div class="sc-cat">Team tasks, timelines, cross-functional projects</div><span class="sc-cost cost-low">$11/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://monday.com" target="_blank" rel="noopener">Monday.com</a></div><div class="sc-cat">Visual PM + built-in automations and dashboards</div><span class="sc-cost cost-mid">$12/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://clickup.com" target="_blank" rel="noopener">ClickUp Business</a></div><div class="sc-cat">Unlimited members, time tracking, OKRs</div><span class="sc-cost cost-low">$7/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://basecamp.com" target="_blank" rel="noopener">Basecamp</a></div><div class="sc-cat">Flat-fee, client-friendly, project + messaging combo</div><span class="sc-cost cost-mid">$99/mo flat</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">🤝 CRM &amp; Sales</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.hubspot.com/pricing/marketing" target="_blank" rel="noopener">HubSpot Starter</a></div><div class="sc-cat">CRM + email sequences + pipeline automation</div><span class="sc-cost cost-low">$45/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.pipedrive.com" target="_blank" rel="noopener">Pipedrive</a></div><div class="sc-cat">Sales-pipeline focused, clean UI</div><span class="sc-cost cost-low">$15/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.zoho.com/crm" target="_blank" rel="noopener">Zoho CRM</a></div><div class="sc-cat">Full-featured at SMB price point</div><span class="sc-cost cost-low">$14/user/mo</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">💬 Internal Communications &amp; Meetings</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://slack.com" target="_blank" rel="noopener">Slack</a></div><div class="sc-cat">Team messaging + app integrations hub</div><span class="sc-cost cost-low">$8/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://zoom.us/pricing" target="_blank" rel="noopener">Zoom Workplace</a></div><div class="sc-cat">Video meetings + team chat + phone — unified, scalable comms platform</div><span class="sc-cost cost-low">$15.99/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.microsoft.com/en-us/microsoft-teams/group-chat-software" target="_blank" rel="noopener">Microsoft Teams</a></div><div class="sc-cat">Bundled with M365 — meetings + docs + chat</div><span class="sc-cost cost-low">Bundled in M365</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.loom.com" target="_blank" rel="noopener">Loom</a> + <a class="tool-link" href="https://www.notion.so" target="_blank" rel="noopener">Notion</a></div><div class="sc-cat">Async video + documentation knowledge base</div><span class="sc-cost cost-low">~$20/user/mo</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">🏦 Finance &amp; HR</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://quickbooks.intuit.com" target="_blank" rel="noopener">QuickBooks Online Plus</a></div><div class="sc-cat">Accounting, payroll, project job costing</div><span class="sc-cost cost-mid">$60/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://gusto.com" target="_blank" rel="noopener">Gusto</a></div><div class="sc-cat">Payroll + HR + benefits administration</div><span class="sc-cost cost-mid">$40 + $6/person</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.rippling.com" target="_blank" rel="noopener">Rippling</a></div><div class="sc-cat">HR + IT + payroll unified — scales well</div><span class="sc-cost cost-mid">$8/user/mo+</span></div>
+      </div>
+    </div>
+    <div class="pm-box">
+      <h4>PM Operating Principles — SMB Tier</h4>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Define ownership before buying tools.</strong> Most SMB stack failures happen because nobody owns the tool post-launch. Assign a Directly Responsible Individual (DRI) for every platform. Ownerless tools become shelfware within 90 days.</span></div>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Create lightweight SOPs before complexity compounds.</strong> Document how your tools connect before you have 15 of them. One-page integration maps save months of confusion and prevent data silos.</span></div>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Watch the integration tax.</strong> Every tool that doesn't natively connect to your hub creates a Zapier bridge or manual sync point — which quietly becomes someone's part-time job. Audit quarterly.</span></div>
+    </div>
+  </div>
+
+  <!-- MID-MARKET -->
+  <div class="tier-panel" id="tab-midmarket">
+    <div class="tier-header">
+      <div class="tier-icon" style="background:#E8F0FA">📊</div>
+      <div class="tier-meta">
+        <h2>Mid-Market Organization</h2>
+        <p>50–500 people. Complexity has arrived. You have departments, cross-functional dependencies, and enough volume that bad data is expensive. This tier requires formal PMO structure, governed integrations, and operational frameworks — not just tools, but a coherent system architecture.</p>
+      </div>
+    </div>
+    <div class="signals-row">
+      <div class="signal-card"><div class="sc-label">Team size</div><div class="sc-val">50–500 people</div></div>
+      <div class="signal-card"><div class="sc-label">Annual revenue</div><div class="sc-val">$10M – $1B</div></div>
+      <div class="signal-card"><div class="sc-label">PM maturity</div><div class="sc-val">Formal PM / emerging PMO</div></div>
+      <div class="signal-card"><div class="sc-label">Stack budget</div><div class="sc-val">$5K – $100K/mo</div></div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">📋 PPM — Project &amp; Portfolio Management</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.smartsheet.com" target="_blank" rel="noopener">Smartsheet</a></div><div class="sc-cat">PM + resource management + portfolio dashboards</div><span class="sc-cost cost-mid">$25/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.wrike.com" target="_blank" rel="noopener">Wrike</a></div><div class="sc-cat">Cross-dept PM + proofing + request forms</div><span class="sc-cost cost-mid">$25/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.microsoft.com/en-us/microsoft-365/project/project-management-software" target="_blank" rel="noopener">Microsoft Project / Planner</a></div><div class="sc-cat">Schedule + resource management in M365 ecosystem</div><span class="sc-cost cost-mid">$30/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.planview.com" target="_blank" rel="noopener">Planview</a></div><div class="sc-cat">Portfolio-level strategic execution visibility</div><span class="sc-cost cost-high">Enterprise pricing</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">🤝 CRM &amp; Revenue Operations</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.salesforce.com/products/sales-cloud/overview" target="_blank" rel="noopener">Salesforce Sales Cloud</a></div><div class="sc-cat">Enterprise CRM + forecasting + AppExchange ecosystem</div><span class="sc-cost cost-high">$75+/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.hubspot.com/pricing" target="_blank" rel="noopener">HubSpot Professional</a></div><div class="sc-cat">Marketing + Sales + Service hub with automation</div><span class="sc-cost cost-mid">$800+/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.zoho.com/one" target="_blank" rel="noopener">Zoho One</a></div><div class="sc-cat">40+ apps — full business suite at lower TCO</div><span class="sc-cost cost-mid">$37/user/mo</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">💬 Communications &amp; Collaboration</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://slack.com/intl/en-us/enterprise" target="_blank" rel="noopener">Slack Business+</a></div><div class="sc-cat">Enterprise messaging + workflow automation + extended message history</div><span class="sc-cost cost-mid">$15/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://zoom.us/pricing/business" target="_blank" rel="noopener">Zoom Workplace Business</a></div><div class="sc-cat">Video + team chat + phone + AI Companion — unified comms for growing orgs</div><span class="sc-cost cost-mid">$21.99/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.microsoft.com/en-us/microsoft-teams/group-chat-software" target="_blank" rel="noopener">Microsoft Teams</a></div><div class="sc-cat">Meetings + docs + calling — embedded in M365 ecosystem</div><span class="sc-cost cost-low">Bundled in M365</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">📈 Business Intelligence &amp; Data</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://powerbi.microsoft.com" target="_blank" rel="noopener">Power BI</a></div><div class="sc-cat">Dashboards + reporting — best value in M365</div><span class="sc-cost cost-low">$10/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.tableau.com" target="_blank" rel="noopener">Tableau</a></div><div class="sc-cat">Advanced visualization + Salesforce integration</div><span class="sc-cost cost-high">$70/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://lookerstudio.google.com" target="_blank" rel="noopener">Looker / Looker Studio</a></div><div class="sc-cat">Cloud-native BI — strong for GCP environments</div><span class="sc-cost cost-mid">Varies</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">🏦 ERP &amp; Core Operations</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.netsuite.com" target="_blank" rel="noopener">NetSuite ERP</a></div><div class="sc-cat">Financial management + inventory + project accounting</div><span class="sc-cost cost-high">$999+/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.sageintacct.com" target="_blank" rel="noopener">Sage Intacct</a></div><div class="sc-cat">Financial + project accounting + multi-entity</div><span class="sc-cost cost-high">Custom pricing</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.workday.com" target="_blank" rel="noopener">Workday HCM</a></div><div class="sc-cat">HR + workforce planning + payroll at scale</div><span class="sc-cost cost-high">Custom pricing</span></div>
+      </div>
+    </div>
+    <div class="pm-box">
+      <h4>PM Operating Principles — Mid-Market Tier</h4>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Portfolio visibility is the PMO's deliverable.</strong> You need a single source of truth: what's in flight, what's at risk, what's consuming capacity. Executive dashboards aren't nice-to-haves — they're how the PMO justifies its existence and earns strategic influence.</span></div>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Standardize before you scale.</strong> Build templates, naming conventions, and intake governance before adding more projects. Garbage-in at mid-market creates enterprise-level cleanup costs. Debt compounds.</span></div>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Govern integrations, not just tools.</strong> Map your data flows. Designate one system as source of truth for every data type. Duplicate records at this scale are operationally expensive — and a sign of ungoverned architecture.</span></div>
+    </div>
+  </div>
+
+  <!-- ENTERPRISE -->
+  <div class="tier-panel" id="tab-enterprise">
+    <div class="tier-header">
+      <div class="tier-icon" style="background:#F0EAFA">🏛️</div>
+      <div class="tier-meta">
+        <h2>Large Enterprise / Complex Organization</h2>
+        <p>500+ people. The stack is no longer a discretionary choice — it's organizational infrastructure. Every decision requires security review, procurement governance, change management, and multi-year roadmaps. The PM role here operates at architecture-level coordination across vendors, contracts, compliance, and human systems.</p>
+      </div>
+    </div>
+    <div class="signals-row">
+      <div class="signal-card"><div class="sc-label">Team size</div><div class="sc-val">500+ / global teams</div></div>
+      <div class="signal-card"><div class="sc-label">Annual revenue</div><div class="sc-val">$1B+</div></div>
+      <div class="signal-card"><div class="sc-label">PM maturity</div><div class="sc-val">Mature PMO / EPO</div></div>
+      <div class="signal-card"><div class="sc-label">Stack budget</div><div class="sc-val">$100K – $10M+/yr</div></div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">📋 Enterprise PPM / EPM</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.planview.com/products/enterprise-one" target="_blank" rel="noopener">Planview Enterprise One</a></div><div class="sc-cat">Portfolio + resource + strategy execution alignment</div><span class="sc-cost cost-high">Enterprise</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.servicenow.com/products/strategic-portfolio-management.html" target="_blank" rel="noopener">ServiceNow PPM</a></div><div class="sc-cat">ITSM + project portfolio + demand management</div><span class="sc-cost cost-high">Enterprise</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://business.adobe.com/products/workfront/main.html" target="_blank" rel="noopener">Adobe Workfront</a></div><div class="sc-cat">Enterprise work management + creative ops</div><span class="sc-cost cost-high">Enterprise</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.microsoft.com/en-us/microsoft-365/project/project-management-software" target="_blank" rel="noopener">MS Project + Power Platform</a></div><div class="sc-cat">Scheduling + automation in full M365 ecosystem</div><span class="sc-cost cost-high">Per plan</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">💬 Enterprise Communications &amp; Collaboration</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://zoom.us/pricing/enterprise" target="_blank" rel="noopener">Zoom Workplace Enterprise</a></div><div class="sc-cat">Video + phone + chat + AI Companion + Zoom Rooms + webinars — SSO, DLP, advanced compliance</div><span class="sc-cost cost-high">Custom pricing</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://slack.com/intl/en-us/enterprise" target="_blank" rel="noopener">Slack Enterprise Grid</a></div><div class="sc-cat">Multi-workspace, org-level policies, DLP + HIPAA compliance</div><span class="sc-cost cost-high">Custom pricing</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.microsoft.com/en-us/microsoft-teams/enterprise" target="_blank" rel="noopener">Microsoft Teams Enterprise</a></div><div class="sc-cat">Calling + meetings + channels + full M365/Azure integration</div><span class="sc-cost cost-high">Per plan</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.webex.com/pricing/index.html" target="_blank" rel="noopener">Cisco Webex</a></div><div class="sc-cat">Enterprise video + calling + security — strong in regulated industries</div><span class="sc-cost cost-high">Custom pricing</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">🏦 ERP &amp; Core Systems</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.sap.com/products/erp/s4hana.html" target="_blank" rel="noopener">SAP S/4HANA</a></div><div class="sc-cat">Global ERP + finance + supply chain + manufacturing</div><span class="sc-cost cost-high">$100K+/yr</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.oracle.com/erp" target="_blank" rel="noopener">Oracle Cloud ERP</a></div><div class="sc-cat">Finance + procurement + project + HR cloud suite</div><span class="sc-cost cost-high">Enterprise</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.workday.com/en-us/products/financial-management/overview.html" target="_blank" rel="noopener">Workday Finance + HCM</a></div><div class="sc-cat">Financial management + workforce platform</div><span class="sc-cost cost-high">Enterprise</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">🤝 CRM &amp; Revenue Ops</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.salesforce.com/editions-pricing/sales-cloud" target="_blank" rel="noopener">Salesforce Enterprise / Unlimited</a></div><div class="sc-cat">Full CRM + revenue cloud + AI + AppExchange</div><span class="sc-cost cost-high">$165+/user/mo</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://dynamics.microsoft.com/en-us/pricing" target="_blank" rel="noopener">Microsoft Dynamics 365</a></div><div class="sc-cat">CRM + ERP in full M365/Azure ecosystem</div><span class="sc-cost cost-high">$65+/user/mo</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">📈 Data, Analytics &amp; BI</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.snowflake.com" target="_blank" rel="noopener">Snowflake</a> + <a class="tool-link" href="https://www.getdbt.com" target="_blank" rel="noopener">dbt</a></div><div class="sc-cat">Cloud data warehouse + transformation pipeline</div><span class="sc-cost cost-high">Consumption-based</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.tableau.com" target="_blank" rel="noopener">Tableau / Tableau CRM</a></div><div class="sc-cat">Advanced visualization + predictive analytics + AI</div><span class="sc-cost cost-high">Enterprise</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://powerbi.microsoft.com/en-us/power-bi-premium" target="_blank" rel="noopener">Power BI Premium</a></div><div class="sc-cat">Enterprise BI + embedded reporting at scale</div><span class="sc-cost cost-high">$20/user/mo+</span></div>
+      </div>
+    </div>
+    <div class="stack-section">
+      <div class="stack-label">🛡️ Security, ITSM &amp; Compliance</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.servicenow.com/products/itsm.html" target="_blank" rel="noopener">ServiceNow ITSM</a></div><div class="sc-cat">Incident + change + CMDB + service catalog</div><span class="sc-cost cost-high">Enterprise</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.okta.com" target="_blank" rel="noopener">Okta</a> / <a class="tool-link" href="https://www.microsoft.com/en-us/security/business/identity-access/microsoft-entra-id" target="_blank" rel="noopener">Azure AD</a></div><div class="sc-cat">Identity + access management + SSO</div><span class="sc-cost cost-high">Per user</span></div>
+        <div class="stack-card"><div class="sc-name"><a class="tool-link" href="https://www.archerirm.com" target="_blank" rel="noopener">Archer</a> / <a class="tool-link" href="https://www.rsa.com" target="_blank" rel="noopener">RSA</a></div><div class="sc-cat">GRC + risk management + compliance tracking</div><span class="sc-cost cost-high">Enterprise</span></div>
+      </div>
+    </div>
+    <div class="pm-box">
+      <h4>PM Operating Principles — Enterprise Tier</h4>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>The PM is the integration architect.</strong> At this scale, the program manager's job is coordinating the system landscape — mapping data flows, owning integration failures, and translating between IT, business, and vendor contract terms. Technical fluency is non-negotiable.</span></div>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Change management IS the project.</strong> A new enterprise tool is a behavior change initiative, not a software deployment. Budget 40–60% of your implementation timeline for training, adoption, and rollout governance. Technology goes live day one; people take 90.</span></div>
+      <div class="pm-row"><span class="pm-arrow">→</span><span><strong>Deprecation is a deliverable.</strong> Every tool adoption must arrive with a sunset plan for what it replaces. Zombie tools — paid, barely used, still integrated — are the leading source of enterprise tech debt. Killing tools is as important as launching them.</span></div>
+    </div>
+  </div>
+
+  <!-- EVALUATION FRAMEWORK -->
+  <div class="tier-panel" id="tab-eval">
+    <div class="section-head">How to Evaluate Any Tool Before You Buy</div>
+    <p class="section-sub">Apply this 7-dimension scorecard to any tool evaluation. Weight each dimension based on your tier and organizational priorities. A tool that scores well on dimensions that don't matter to your stage is still the wrong tool.</p>
+    <div class="scorecard-wrap">
+      <table class="scorecard-table">
+        <thead><tr><th>Dimension</th><th>What to assess</th><th>Solo</th><th>SMB</th><th>Mid-Mkt</th><th>Enterprise</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Execution fit</strong></td><td>Does it solve your actual bottleneck, or just look capable?</td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-high">High</span></td></tr>
+          <tr><td><strong>Integration depth</strong></td><td>Native connectors to your existing stack, or API/Zapier-only?</td><td><span class="wt-badge wt-med">Med</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-critical">Critical</span></td></tr>
+          <tr><td><strong>Total cost of ownership</strong></td><td>Subscription + implementation + training + maintenance + migration</td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-med">Med</span></td><td><span class="wt-badge wt-med">Med</span></td></tr>
+          <tr><td><strong>Adoption friction</strong></td><td>Time-to-consistent use — how long before the team actually uses it?</td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-critical">Critical</span></td></tr>
+          <tr><td><strong>Scalability ceiling</strong></td><td>Does it grow to your next tier without a painful migration?</td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-med">Med</span></td><td><span class="wt-badge wt-low">Low</span></td></tr>
+          <tr><td><strong>Security &amp; compliance</strong></td><td>SOC2, HIPAA, FedRAMP, SSO, RBAC, data residency, audit logs</td><td><span class="wt-badge wt-low">Low</span></td><td><span class="wt-badge wt-med">Med</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-critical">Critical</span></td></tr>
+          <tr><td><strong>Vendor stability</strong></td><td>Funding runway, customer base, acquisition risk, support SLAs</td><td><span class="wt-badge wt-low">Low</span></td><td><span class="wt-badge wt-med">Med</span></td><td><span class="wt-badge wt-high">High</span></td><td><span class="wt-badge wt-critical">Critical</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="section-head" style="font-size:15px">Red Flags — Stop the Evaluation</div>
+    <p style="font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink-muted);margin-bottom:12px;line-height:1.6;">Any of these is sufficient cause to pause a tool evaluation and ask harder questions before committing.</p>
+    <div class="red-flag-list">
+      <div class="red-flag"><div class="rf-icon">⚠</div><span>No native integration with your PM or CRM hub — every sync is manual, brittle, or requires paid middleware</span></div>
+      <div class="red-flag"><div class="rf-icon">⚠</div><span>Pricing scales sharply with users before you've validated adoption — locked into cost before proven value</span></div>
+      <div class="red-flag"><div class="rf-icon">⚠</div><span>No sandbox or trial environment — you can't test real workflows before committing your data</span></div>
+      <div class="red-flag"><div class="rf-icon">⚠</div><span>Vendor can't provide references from your tier or industry — "we work with everyone" is not proof of fit</span></div>
+      <div class="red-flag"><div class="rf-icon">⚠</div><span>Data export is restricted, paywalled, or requires professional services — you can never fully exit on your terms</span></div>
+      <div class="red-flag"><div class="rf-icon">⚠</div><span>The champion for this tool is the person least impacted by failure — classic incentive misalignment red flag</span></div>
+      <div class="red-flag"><div class="rf-icon">⚠</div><span>No defined DRI (Directly Responsible Individual) for post-launch ownership — ownership vacuums kill adoption</span></div>
+    </div>
+  </div>
+
+  <!-- BUILD / REVISE -->
+  <div class="tier-panel" id="tab-build">
+    <div class="section-head">Building, Adjusting, or Revising Your Stack</div>
+    <p class="section-sub">Whether you're starting from zero, inheriting chaos, or scaling up — this is the PM-led 9-step process for tech stack decisions that actually stick.</p>
+    <div class="stack-label" style="margin-bottom:12px">Phase 1 — Audit What Exists</div>
+    <div class="phase-steps">
+      <div class="phase-step"><div class="phase-num">1</div><div class="phase-content"><h5>Inventory every tool in use — including shadow IT</h5><p>Survey each department. Review invoices and credit card charges. The goal is a complete picture, including tools people are using that aren't officially sanctioned. Shadow IT is a symptom of unmet needs, not employee misconduct.</p></div></div>
+      <div class="phase-step"><div class="phase-num">2</div><div class="phase-content"><h5>Map the integrations and data flows</h5><p>For each tool: what data goes in, what data comes out, what it connects to, and who owns it. You're drawing an architecture map before you make any changes. This reveals duplication, gaps, and single points of failure.</p></div></div>
+      <div class="phase-step"><div class="phase-num">3</div><div class="phase-content"><h5>Identify execution gaps — not tool gaps</h5><p>Where does work stall? Where is data re-entered manually? Where do teams maintain parallel spreadsheets because the official tool doesn't meet their needs? These friction points are your highest-priority targets — not feature wish lists.</p></div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="stack-label" style="margin-bottom:12px">Phase 2 — Prioritize and Decide</div>
+    <div class="phase-steps">
+      <div class="phase-step"><div class="phase-num">4</div><div class="phase-content"><h5>Classify each tool: Keep / Optimize / Replace / Retire</h5><p>Keep tools that are deeply embedded and well-adopted. Optimize tools with high value but low utilization — training and configuration often fix these. Replace tools creating more friction than they solve. Retire tools nobody actively uses.</p></div></div>
+      <div class="phase-step"><div class="phase-num">5</div><div class="phase-content"><h5>Define your hub systems — the source of truth anchors</h5><p>Every stack needs one system as the source of truth for work execution (PM hub) and one for customer/stakeholder data (CRM hub). All other tools should flow toward — not compete with — these hubs. Hub confusion is the root cause of most data integrity problems.</p></div></div>
+      <div class="phase-step"><div class="phase-num">6</div><div class="phase-content"><h5>Score new tools against your evaluation dimensions</h5><p>Use the weighted scorecard from the Evaluation Framework tab. Weight dimensions based on your tier. Require a vendor demo, a pilot with real workflows, and a reference check from a similar organization before any commitment over $500/mo.</p></div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="stack-label" style="margin-bottom:12px">Phase 3 — Implement and Govern</div>
+    <div class="phase-steps">
+      <div class="phase-step"><div class="phase-num">7</div><div class="phase-content"><h5>Assign a DRI for every platform before launch</h5><p>One Directly Responsible Individual owns the tool — its configuration, its adoption metrics, its renewal decision, and its failure. No DRI equals an orphaned tool within 12 months. This is not an IT role; it belongs to the functional owner.</p></div></div>
+      <div class="phase-step"><div class="phase-num">8</div><div class="phase-content"><h5>Build a 30-60-90 day adoption plan before day one</h5><p>Define what successful adoption looks like before you launch. Set measurable milestones: 50%+ of team using core workflows by day 30, all SOPs documented by day 60, full rollout and training complete by day 90. Treat this like a project because it is one.</p></div></div>
+      <div class="phase-step"><div class="phase-num">9</div><div class="phase-content"><h5>Conduct quarterly stack reviews — the stack is never done</h5><p>Every quarter: review utilization metrics, integration health, cost vs. value, and gaps that have emerged since the last review. Business needs evolve faster than most organizations revisit their tools. The stack is a living operational system, not a one-time decision.</p></div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-head" style="font-size:15px">The PM's Operating Philosophy on Tech Stacks</div>
+    <div class="phil-grid">
+      <div class="phil-card"><div class="pc-num">01</div><p><strong>Tools don't fix broken processes.</strong> They amplify them. Fix the process first, document it, then automate it. Otherwise you're just speeding up the wrong thing.</p></div>
+      <div class="phil-card"><div class="pc-num">02</div><p><strong>Adoption beats capability.</strong> 80% adoption on a good tool beats 10% adoption on a perfect one. Every time. The best stack is the one your team actually uses.</p></div>
+      <div class="phil-card"><div class="pc-num">03</div><p><strong>Every tool has a surface area.</strong> The more it touches — people, data, processes — the more expensive it is to replace. Think before you deeply embed.</p></div>
+      <div class="phil-card"><div class="pc-num">04</div><p><strong>Tool debt compounds faster than tech debt.</strong> People adapt their habits around bad tools and call it normal. That normalization is how organizations lose years of efficiency.</p></div>
+    </div>
+  </div>
+
+  <div class="cta-strip">
+    <div class="logo-block">
+      <a href='https://postimg.cc/bSYhPL8Q' target='_blank'><img src='https://i.postimg.cc/bSYhPL8Q/rev-Screenshot-2026-04-27-at-10-23-19-AM.png' border='0' alt='rev-Screenshot-2026-04-27-at-10-23-19-AM'></a>
+    </div>
+    <strong>Diagnose. Build. Execute. Scale.</strong>
+      Tucson, AZ | greaterambitionsllc.com
+  </div>
+</main>
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.tier-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
